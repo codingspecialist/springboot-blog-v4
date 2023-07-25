@@ -6,7 +6,10 @@
     <title>Document</title>
   </head>
   <body>
-    <h1>test 파일 연결확인</h1>
-    <h2>{{ username }}</h2>
+    {{ list.0 }}
+    <h1>array 파일 연결확인</h1>
+    {{#list}}
+    {{.}}
+    {{/list}}
   </body>
 </html>
