@@ -6,6 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ErrorController {
 
+    @GetMapping("/exLogin")
+    public String exLogin() {
+        return "error/exLogin";
+    }
+
     @GetMapping("/40x")
     public String ex40x() {
         return "error/ex40x";
