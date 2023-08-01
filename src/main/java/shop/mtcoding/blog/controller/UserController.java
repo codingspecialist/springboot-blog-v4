@@ -1,10 +1,5 @@
 package shop.mtcoding.blog.controller;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +29,12 @@ public class UserController {
             return "redirect:/40x";
         }
 
-        userRepository.save(joinDTO); // 핵심 기능
+        try {
+            userRepository.save(joinDTO); // 핵심 기능
+        } catch (Exception e) {
+            return "redirect:/50x";
+        }
+
         return "redirect:/loginForm";
     }
 

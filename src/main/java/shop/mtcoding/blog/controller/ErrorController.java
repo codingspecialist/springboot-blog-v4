@@ -10,4 +10,9 @@ public class ErrorController {
     public String ex40x() {
         return "error/ex40x";
     }
+
+    @GetMapping("/50x")
+    public String ex50x() {
+        return "error/ex50x";
+    }
 }
