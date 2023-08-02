@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
@@ -26,7 +27,16 @@ public class BoardController {
     @Autowired
     private BoardRepository boardRepository;
 
-    // localhost:8080?page=1
+    @ResponseBody
+    @GetMapping("/hello")
+    public String hello(int a, int b) {
+
+        System.out.println("a : " + a);
+        System.out.println("b : " + b);
+        return "ok";
+    }
+
+    // http://localhost:8080?num=4
     @GetMapping({ "/", "/board" })
     public String index(
             @RequestParam(defaultValue = "0") Integer page,
@@ -90,8 +100,20 @@ public class BoardController {
     // localhost:8080/board/1
     // localhost:8080/board/50
     @GetMapping("/board/{id}")
-    public String detail(@PathVariable Integer id) {
+    public String detail(@PathVariable Integer id, HttpServletRequest request) { // C
+        User sessionUser = (User) session.getAttribute("sessionUser"); // 세션접근
+        Board board = boardRepository.findById(id); // M
 
-        return "board/detail";
+        boolean pageOwner = false;
+        if (sessionUser != null) {
+            System.out.println("테스트 세션 ID : " + sessionUser.getId());
+            System.out.println("테스트 세션 board.getUser().getId() : " + board.getUser().getId());
+            pageOwner = sessionUser.getId() == board.getUser().getId();
+            System.out.println("테스트 : pageOwner : " + pageOwner);
+        }
+
+        request.setAttribute("board", board);
+        request.setAttribute("pageOwner", pageOwner);
+        return "board/detail"; // V
     }
 }

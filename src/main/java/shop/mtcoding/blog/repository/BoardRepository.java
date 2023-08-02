@@ -21,6 +21,11 @@ public class BoardRepository {
     @Autowired
     private EntityManager em;
 
+    // select id, title from board_tb
+    // resultClass 안붙이고 직접 파싱하려면!!
+    // Object[] 로 리턴됨.
+    // object[0] = 1
+    // object[1] = 제목1
     public int count() {
         Query query = em.createNativeQuery("select count(*) from board_tb");
         // 원래는 Object 배열로 리턴 받는다, Object 배열은 칼럼의 연속이다.
@@ -55,5 +60,12 @@ public class BoardRepository {
         query.setParameter("content", writeDTO.getContent());
         query.setParameter("userId", userId);
         query.executeUpdate();
+    }
+
+    public Board findById(Integer id) {
+        Query query = em.createNativeQuery("select * from board_tb where id = :id", Board.class);
+        query.setParameter("id", id);
+        Board board = (Board) query.getSingleResult();
+        return board;
     }
 }
