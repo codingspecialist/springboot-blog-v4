@@ -5,7 +5,7 @@
     <!-- 수정삭제버튼 -->
     {{#pageOwner}}
     <div class="d-flex justify-content-end">
-        <button class="btn btn-warning me-1">수정</button>
+        <a class="btn btn-warning me-1" href="/board/{{board.id}}/updateForm">수정</a>
         <form action="/board/{{board.id}}/delete" method="post">
             <button type="submit" class="btn btn-danger">삭제</button>
         </form>
