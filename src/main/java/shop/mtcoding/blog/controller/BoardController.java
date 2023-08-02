@@ -27,13 +27,29 @@ public class BoardController {
     @Autowired
     private BoardRepository boardRepository;
 
-    @ResponseBody
-    @GetMapping("/hello")
-    public String hello(int a, int b) {
+    @PostMapping("/board/{id}/delete")
+    public String delete(@PathVariable Integer id) { // 1. PathVariable 값 받기
+        // 2.인증검사
+        // session에 접근해서 sessionUser 키값을 가져오세요
+        // null 이면, 로그인페이지로 보내고
+        // null 아니면, 3번을 실행하세요.
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/loginForm";
+        }
 
-        System.out.println("a : " + a);
-        System.out.println("b : " + b);
-        return "ok";
+        // 3. 권한검사
+        Board board = boardRepository.findById(id);
+        if (board.getUser().getId() != sessionUser.getId()) {
+            return "redirect:/40x";
+        }
+
+        // 4. 모델에 접근해서 삭제
+        // boardRepository.deleteById(id); 호출하세요 -> 리턴을 받지 마세요
+        // delete from board_tb where id = :id
+        boardRepository.deleteById(id);
+
+        return "redirect:/";
     }
 
     // http://localhost:8080?num=4
