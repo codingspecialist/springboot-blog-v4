@@ -1,8 +1,11 @@
 package shop.mtcoding.blog.controller;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,15 +25,14 @@ public class UserController {
     @Autowired
     private HttpSession session; // request는 가방, session은 서랍
 
-    @ResponseBody
-    @GetMapping("/test/login")
-    public String testLogin() {
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "로그인이 되지 않았습니다";
-        } else {
-            return "로그인 됨 : " + sessionUser.getUsername();
+    // localhost:8080/check?username=ssar
+    @GetMapping("/check")
+    public ResponseEntity<String> check(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            return new ResponseEntity<String>("유저네임이 중복 되었습니다", HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<String>("유저네임을 사용할 수 있습니다", HttpStatus.OK);
     }
 
     @PostMapping("/login")
@@ -44,8 +46,8 @@ public class UserController {
         }
 
         // 핵심 기능
-        System.out.println("테스트 : username : " + loginDTO.getUsername());
-        System.out.println("테스트 : password : " + loginDTO.getPassword());
+        // System.out.println("테스트 : username : " + loginDTO.getUsername());
+        // System.out.println("테스트 : password : " + loginDTO.getPassword());
 
         try {
             User user = userRepository.findByUsernameAndPassword(loginDTO);
@@ -54,12 +56,12 @@ public class UserController {
         } catch (Exception e) {
             return "redirect:/exLogin";
         }
+
     }
 
     // 실무
     @PostMapping("/join")
     public String join(JoinDTO joinDTO) {
-
         // validation check (유효성 검사)
         if (joinDTO.getUsername() == null || joinDTO.getUsername().isEmpty()) {
             return "redirect:/40x";
@@ -71,13 +73,40 @@ public class UserController {
             return "redirect:/40x";
         }
 
-        try {
-            userRepository.save(joinDTO); // 핵심 기능
-        } catch (Exception e) {
+        // DB에 해당 username이 있는지 체크해보기
+        User user = userRepository.findByUsername(joinDTO.getUsername());
+        if (user != null) {
             return "redirect:/50x";
         }
-
+        userRepository.save(joinDTO); // 핵심 기능
         return "redirect:/loginForm";
+    }
+
+    // ip주소 부여 : 10.5.9.200:8080 -> mtcoding.com:8080
+    // localhost, 127.0.0.1
+    // a태그 form태그 method=get
+    @GetMapping("/joinForm")
+    public String joinForm() {
+        // templates/
+        // .mustache
+        // templates//user/joinForm.mustache
+        return "user/joinForm"; // ViewResolver
+    }
+
+    @GetMapping("/loginForm")
+    public String loginForm() {
+        return "user/loginForm";
+    }
+
+    @GetMapping("/user/updateForm")
+    public String updateForm() {
+        return "user/updateForm";
+    }
+
+    @GetMapping("/logout")
+    public String logout() {
+        session.invalidate(); // 세션 무효화 (내 서랍을 비우는 것)
+        return "redirect:/";
     }
 
     // 정상인
@@ -122,31 +151,4 @@ public class UserController {
     // System.out.println("email : " + email);
     // return "redirect:/loginForm";
     // }
-
-    // ip주소 부여 : 10.5.9.200:8080 -> mtcoding.com:8080
-    // localhost, 127.0.0.1
-    // a태그 form태그 method=get
-    @GetMapping("/joinForm")
-    public String joinForm() {
-        // templates/
-        // .mustache
-        // templates//user/joinForm.mustache
-        return "user/joinForm"; // ViewResolver
-    }
-
-    @GetMapping("/loginForm")
-    public String loginForm() {
-        return "user/loginForm";
-    }
-
-    @GetMapping("/user/updateForm")
-    public String updateForm() {
-        return "user/updateForm";
-    }
-
-    @GetMapping("/logout")
-    public String logout() {
-        session.invalidate(); // 세션 무효화 (내 서랍을 비우는 것)
-        return "redirect:/";
-    }
 }
