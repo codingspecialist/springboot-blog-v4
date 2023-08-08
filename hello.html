@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .box {
+            border: 1px solid black;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="banana"></div>
+    <div id="down"></div>
+    <script>
+        async function down() {
+            let r = await fetch("http://localhost:8080/hello/v1");
+            let body = await r.text();
+            alert(body);
+        }
+
+        function render() {
+            document.querySelector("#banana").innerHTML = "바나나";
+        }
+        down();
+        render();
+    </script>
+</body>
+
+</html>
