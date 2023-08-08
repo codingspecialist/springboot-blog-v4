@@ -64,7 +64,7 @@ public class BoardRepository {
         query.executeUpdate();
     }
 
-    public List<BoardDetailDTO> findByIdJoinReply(int boardId) {
+    public List<BoardDetailDTO> findByIdJoinReply(Integer boardId, Integer sessionUserId) {
         String sql = "select ";
         sql += "b.id board_id, ";
         sql += "b.content board_content, ";
@@ -73,7 +73,13 @@ public class BoardRepository {
         sql += "r.id reply_id, ";
         sql += "r.comment reply_comment, ";
         sql += "r.user_id reply_user_id, ";
-        sql += "ru.username reply_user_username ";
+        sql += "ru.username reply_user_username, ";
+        if (sessionUserId == null) {
+            sql += "false reply_owner ";
+        } else {
+            sql += "case when r.user_id = :sessionUserId then true else false end reply_owner ";
+        }
+
         sql += "from board_tb b left outer join reply_tb r ";
         sql += "on b.id = r.board_id ";
         sql += "left outer join user_tb ru ";
@@ -82,6 +88,9 @@ public class BoardRepository {
         sql += "order by r.id desc";
         Query query = em.createNativeQuery(sql);
         query.setParameter("boardId", boardId);
+        if (sessionUserId != null) {
+            query.setParameter("sessionUserId", sessionUserId);
+        }
 
         JpaResultMapper mapper = new JpaResultMapper();
         List<BoardDetailDTO> dtos = mapper.list(query, BoardDetailDTO.class);
