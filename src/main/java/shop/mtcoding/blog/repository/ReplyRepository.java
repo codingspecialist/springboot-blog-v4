@@ -21,6 +21,12 @@ public class ReplyRepository {
     @Autowired
     private EntityManager em;
 
+    public Reply findById(int id) {
+        Query query = em.createNativeQuery("select * from reply_tb where id = :id", Reply.class);
+        query.setParameter("id", id);
+        return (Reply) query.getSingleResult();
+    }
+
     public List<Reply> findByBoardId(Integer boardId) {
         Query query = em.createNativeQuery("select * from reply_tb where board_id = :boardId", Reply.class);
         query.setParameter("boardId", boardId);
@@ -36,6 +42,16 @@ public class ReplyRepository {
         query.setParameter("comment", replyWriteDTO.getComment());
         query.setParameter("boardId", replyWriteDTO.getBoardId());
         query.setParameter("userId", userId);
+        query.executeUpdate();
+    }
+
+    @Transactional
+    public void deleteById(Integer id) {
+        Query query = em
+                .createNativeQuery(
+                        "delete from reply_tb where id = :id");
+
+        query.setParameter("id", id);
         query.executeUpdate();
     }
 }

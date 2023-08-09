@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import shop.mtcoding.blog.dto.BoardDetailDTO;
+import shop.mtcoding.blog.dto.BoardDetailDTOV2;
 import shop.mtcoding.blog.dto.UpdateDTO;
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
@@ -33,20 +34,6 @@ public class BoardController {
 
     @Autowired
     private ReplyRepository replyRepository;
-
-    @ResponseBody
-    @GetMapping("/test/reply")
-    public List<Reply> test2() {
-        List<Reply> replys = replyRepository.findByBoardId(1);
-        return replys;
-    }
-
-    @ResponseBody
-    @GetMapping("/test/board/1")
-    public Board test() {
-        Board board = boardRepository.findById(1);
-        return board;
-    }
 
     @PostMapping("/board/{id}/update")
     public String update(@PathVariable Integer id, UpdateDTO updateDTO) {
@@ -160,6 +147,36 @@ public class BoardController {
         return "board/saveForm";
     }
 
+    @ResponseBody
+    @GetMapping("/v1/board/{id}")
+    public List<BoardDetailDTO> detailV1(@PathVariable Integer id) {
+        User sessionUser = (User) session.getAttribute("sessionUser"); // 세션접근
+        List<BoardDetailDTO> dtos = null;
+        if (sessionUser == null) {
+            dtos = boardRepository.findByIdJoinReply(id, null);
+        } else {
+            dtos = boardRepository.findByIdJoinReply(id, sessionUser.getId());
+        }
+        return dtos;
+    }
+
+    @ResponseBody
+    @GetMapping("/v2/board/{id}")
+    public BoardDetailDTOV2 detailV2(@PathVariable Integer id) {
+        User sessionUser = (User) session.getAttribute("sessionUser"); // 세션접근
+        List<BoardDetailDTO> dtos = null;
+        BoardDetailDTOV2 dtoV2 = null;
+        if (sessionUser == null) {
+            dtos = boardRepository.findByIdJoinReply(id, null);
+            dtoV2 = new BoardDetailDTOV2(dtos, null);
+        } else {
+            dtos = boardRepository.findByIdJoinReply(id, sessionUser.getId());
+            dtoV2 = new BoardDetailDTOV2(dtos, sessionUser.getId());
+        }
+
+        return dtoV2;
+    }
+
     // localhost:8080/board/1
     // localhost:8080/board/50
     @GetMapping("/board/{id}")
@@ -174,15 +191,12 @@ public class BoardController {
 
         boolean pageOwner = false;
         if (sessionUser != null) {
-            // System.out.println("테스트 세션 ID : " + sessionUser.getId());
-            // System.out.println("테스트 세션 board.getUser().getId() : " +
-            // board.getUser().getId());
             pageOwner = sessionUser.getId() == dtos.get(0).getBoardUserId();
-            // System.out.println("테스트 : pageOwner : " + pageOwner);
         }
 
         request.setAttribute("dtos", dtos);
         request.setAttribute("pageOwner", pageOwner);
+
         return "board/detail"; // V
     }
 }

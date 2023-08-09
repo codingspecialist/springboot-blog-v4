@@ -1,15 +1,14 @@
 package shop.mtcoding.blog.controller;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import shop.mtcoding.blog.dto.JoinDTO;
 import shop.mtcoding.blog.dto.LoginDTO;
@@ -78,6 +77,10 @@ public class UserController {
         if (user != null) {
             return "redirect:/50x";
         }
+
+        String encPassword = BCrypt.hashpw(joinDTO.getPassword(), BCrypt.gensalt());
+        System.out.println("encPassword : " + encPassword);
+
         userRepository.save(joinDTO); // 핵심 기능
         return "redirect:/loginForm";
     }

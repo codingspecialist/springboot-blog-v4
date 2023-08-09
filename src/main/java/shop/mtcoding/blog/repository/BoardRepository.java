@@ -64,6 +64,7 @@ public class BoardRepository {
         query.executeUpdate();
     }
 
+    // 동적쿼리
     public List<BoardDetailDTO> findByIdJoinReply(Integer boardId, Integer sessionUserId) {
         String sql = "select ";
         sql += "b.id board_id, ";
