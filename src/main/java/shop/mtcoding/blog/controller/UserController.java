@@ -1,5 +1,6 @@
 package shop.mtcoding.blog.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.mindrot.jbcrypt.BCrypt;
@@ -8,10 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import shop.mtcoding.blog.dto.JoinDTO;
 import shop.mtcoding.blog.dto.LoginDTO;
+import shop.mtcoding.blog.model.SessionUser;
 import shop.mtcoding.blog.model.User;
 import shop.mtcoding.blog.repository.UserRepository;
 
@@ -49,9 +52,14 @@ public class UserController {
         // System.out.println("테스트 : password : " + loginDTO.getPassword());
 
         try {
-            User user = userRepository.findByUsernameAndPassword(loginDTO);
-            session.setAttribute("sessionUser", user);
-            return "redirect:/";
+            User user = userRepository.findByUsername(loginDTO.getUsername());
+            boolean isValid = BCrypt.checkpw(loginDTO.getPassword(), user.getPassword());
+            if (isValid) {
+                session.setAttribute("sessionUser", user);
+                return "redirect:/";
+            } else {
+                return "redirect:/loginForm";
+            }
         } catch (Exception e) {
             return "redirect:/exLogin";
         }
@@ -79,7 +87,8 @@ public class UserController {
         }
 
         String encPassword = BCrypt.hashpw(joinDTO.getPassword(), BCrypt.gensalt());
-        System.out.println("encPassword : " + encPassword);
+        joinDTO.setPassword(encPassword);
+        System.out.println(encPassword.length());
 
         userRepository.save(joinDTO); // 핵심 기능
         return "redirect:/loginForm";
@@ -102,7 +111,15 @@ public class UserController {
     }
 
     @GetMapping("/user/updateForm")
-    public String updateForm() {
+    public String updateForm(HttpServletRequest request) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/loginForm"; // 401
+        }
+
+        User user = userRepository.findByUsername(sessionUser.getUsername());
+        request.setAttribute("user", user);
+
         return "user/updateForm";
     }
 

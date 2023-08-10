@@ -120,30 +120,13 @@ public class BoardController {
 
     @PostMapping("/board/save")
     public String save(WriteDTO writeDTO) {
-        // validation check (유효성 검사)
-        if (writeDTO.getTitle() == null || writeDTO.getTitle().isEmpty()) {
-            return "redirect:/40x";
-        }
-        if (writeDTO.getContent() == null || writeDTO.getContent().isEmpty()) {
-            return "redirect:/40x";
-        }
-
-        // 인증체크
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "redirect:/loginForm";
-        }
-
-        boardRepository.save(writeDTO, sessionUser.getId());
+        boardRepository.save(writeDTO, 1);
         return "redirect:/";
     }
 
     @GetMapping("/board/saveForm")
     public String saveForm() {
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "redirect:/loginForm";
-        }
+
         return "board/saveForm";
     }
 
@@ -163,6 +146,7 @@ public class BoardController {
     @ResponseBody
     @GetMapping("/v2/board/{id}")
     public BoardDetailDTOV2 detailV2(@PathVariable Integer id) {
+        session.setAttribute("sessionUser", new User());
         User sessionUser = (User) session.getAttribute("sessionUser"); // 세션접근
         List<BoardDetailDTO> dtos = null;
         BoardDetailDTOV2 dtoV2 = null;
@@ -181,18 +165,12 @@ public class BoardController {
     // localhost:8080/board/50
     @GetMapping("/board/{id}")
     public String detail(@PathVariable Integer id, HttpServletRequest request) { // C
-        User sessionUser = (User) session.getAttribute("sessionUser"); // 세션접근
-        List<BoardDetailDTO> dtos = null;
-        if (sessionUser == null) {
-            dtos = boardRepository.findByIdJoinReply(id, null);
-        } else {
-            dtos = boardRepository.findByIdJoinReply(id, sessionUser.getId());
-        }
+        // mock (세션으로 변경하자)
+        int sessionUserId = 1;
 
-        boolean pageOwner = false;
-        if (sessionUser != null) {
-            pageOwner = sessionUser.getId() == dtos.get(0).getBoardUserId();
-        }
+        List<BoardDetailDTO> dtos = boardRepository.findByIdJoinReply(id, sessionUserId);
+
+        boolean pageOwner = sessionUserId == id;
 
         request.setAttribute("dtos", dtos);
         request.setAttribute("pageOwner", pageOwner);
