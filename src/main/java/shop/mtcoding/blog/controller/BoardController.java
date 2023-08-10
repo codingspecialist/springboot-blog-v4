@@ -49,14 +49,14 @@ public class BoardController {
             HttpServletRequest request) {
         // 1. 유효성 검사 X
         // 2. 인증검사 X
-        // System.out.println("테스트 : keyword : " + keyword);
-        // System.out.println("테스트 : keyword length : " + keyword.length());
-        // System.out.println("테스트 : keyword isEmpty : " + keyword.isEmpty());
-        // System.out.println("테스트 : keyword isBlank : " + keyword.isBlank());
+        System.out.println("테스트 : keyword : " + keyword);
+        System.out.println("테스트 : keyword length : " + keyword.length());
+        System.out.println("테스트 : keyword isEmpty : " + keyword.isEmpty());
+        System.out.println("테스트 : keyword isBlank : " + keyword.isBlank());
 
         List<Board> boardList = null;
         int totalCount = 0;
-        request.setAttribute("keyword", keyword);
+        request.setAttribute("keyword", keyword); // 공백 or 값있음
         if (keyword.isBlank()) {
             boardList = boardRepository.findAll(page); // page = 1
             totalCount = boardRepository.count();
