@@ -18,7 +18,6 @@ import shop.mtcoding.blog.dto.BoardDetailDTOV2;
 import shop.mtcoding.blog.dto.UpdateDTO;
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
-import shop.mtcoding.blog.model.Reply;
 import shop.mtcoding.blog.model.User;
 import shop.mtcoding.blog.repository.BoardRepository;
 import shop.mtcoding.blog.repository.ReplyRepository;
@@ -45,15 +44,20 @@ public class BoardController {
     // http://localhost:8080?num=4
     @GetMapping({ "/", "/board" })
     public String index(
-            String keyword,
+            @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") Integer page,
             HttpServletRequest request) {
         // 1. 유효성 검사 X
         // 2. 인증검사 X
+        // System.out.println("테스트 : keyword : " + keyword);
+        // System.out.println("테스트 : keyword length : " + keyword.length());
+        // System.out.println("테스트 : keyword isEmpty : " + keyword.isEmpty());
+        // System.out.println("테스트 : keyword isBlank : " + keyword.isBlank());
 
         List<Board> boardList = null;
         int totalCount = 0;
-        if (keyword == null) {
+        request.setAttribute("keyword", keyword);
+        if (keyword.isBlank()) {
             boardList = boardRepository.findAll(page); // page = 1
             totalCount = boardRepository.count();
         } else {
