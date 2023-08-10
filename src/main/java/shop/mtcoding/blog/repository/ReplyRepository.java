@@ -22,9 +22,13 @@ public class ReplyRepository {
     private EntityManager em;
 
     public Reply findById(int id) {
+        System.out.println("테스트 : 1");
         Query query = em.createNativeQuery("select * from reply_tb where id = :id", Reply.class);
+        System.out.println("테스트 : 2");
         query.setParameter("id", id);
-        return (Reply) query.getSingleResult();
+        System.out.println("테스트 : 3");
+        return (Reply) query.getResultList();
+
     }
 
     public List<Reply> findByBoardId(Integer boardId) {

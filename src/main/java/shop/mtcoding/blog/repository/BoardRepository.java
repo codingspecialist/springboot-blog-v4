@@ -36,11 +36,14 @@ public class BoardRepository {
         return count.intValue();
     }
 
-    public int count2() {
-        // Entity(Board, User) 타입이 아니어도, 기본 자료형도 안되더라
-        Query query = em.createNativeQuery("select * from board_tb", Board.class);
-        List<Board> boardList = query.getResultList();
-        return boardList.size();
+    public int count(String keyword) {
+        Query query = em.createNativeQuery("select count(*) from board_tb where title like :keyword");
+        query.setParameter("keyword", "%" + keyword + "%");
+        // 원래는 Object 배열로 리턴 받는다, Object 배열은 칼럼의 연속이다.
+        // 그룹함수를 써서, 하나의 칼럼을 조회하면, Object로 리턴된다.
+        BigInteger count = (BigInteger) query.getSingleResult();
+
+        return count.intValue();
     }
 
     // localhost:8080?page=0
@@ -49,6 +52,18 @@ public class BoardRepository {
         Query query = em.createNativeQuery("select * from board_tb order by id desc limit :page, :size", Board.class);
         query.setParameter("page", page * SIZE);
         query.setParameter("size", SIZE);
+        return query.getResultList();
+    }
+
+    // localhost:8080?page=0
+    public List<Board> findAll(int page, String keyword) {
+        final int SIZE = 3;
+        Query query = em.createNativeQuery(
+                "select * from board_tb where title like :keyword order by id desc limit :page, :size", Board.class);
+        query.setParameter("page", page * SIZE);
+        query.setParameter("size", SIZE);
+        query.setParameter("keyword", "%" + keyword + "%");
+
         return query.getResultList();
     }
 

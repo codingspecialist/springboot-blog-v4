@@ -21,8 +21,11 @@ public class ReplyController {
     @Autowired
     private ReplyRepository replyRepository;
 
+    private static final String TAG = "ReplyController : ";
+
     @PostMapping("/reply/{id}/delete")
     public String delete(@PathVariable Integer id, Integer boardId) {
+
         // 유효성 검사
         if (boardId == null) {
             return "redirect:/40x";
@@ -36,6 +39,7 @@ public class ReplyController {
 
         // 권한체크
         Reply reply = replyRepository.findById(id);
+
         if (reply.getUser().getId() != sessionUser.getId()) {
             return "redirect:/40x"; // 403
         }
